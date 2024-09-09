@@ -39,6 +39,7 @@ def obter_endereco():
 def login():
     if request.method == 'POST':
         matricula = request.form['matricula']
+        
         senha = request.form['senha']
         
 
