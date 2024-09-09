@@ -7,7 +7,7 @@ app.secret_key = 'sua_chave_secreta_aqui'
 
 # Simulação de banco de dados
 usuarios = {
-    'user@example.com': 'senha123',  # Exemplo de e-mail e senha
+    '12345': 'senha123',  # Exemplo de e-mail e senha
 }
 
 # Endpoint para geocodificação reversa usando o backend
