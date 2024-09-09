@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Ponto</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Registrar Ponto</h1>
+    <div id="info-ponto">
+        <p>Data: <span id="data"></span></p>
+        <p>Hora: <span id="hora"></span></p>
+        <p>Localização: <span id="localizacao"></span></p>
+    </div>
+    <form id="form-ponto" method="POST">
+        <input type="hidden" id="data-hora" name="data_hora">
+        <input type="hidden" id="localizacao-input" name="localizacao">
+        <button type="button" onclick="registrarPonto()">Registrar Ponto</button>
+    </form>
+
+    <script>
+        function obterDataHora() {
+            const agora = new Date();
+            const data = agora.toLocaleDateString('pt-BR');
+            const hora = agora.toLocaleTimeString('pt-BR');
+            document.getElementById('data').innerText = data;
+            document.getElementById('hora').innerText = hora;
+            document.getElementById('data-hora').value = `${data} ${hora}`;
+        }
+
+        function registrarPonto() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+
+                    fetch('/obter-endereco', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ lat, lng })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.endereco) {
+                            document.getElementById('localizacao').innerText = data.endereco;
+                            document.getElementById('localizacao-input').value = data.endereco;
+
+                            // Agora envia o formulário
+                            document.getElementById('form-ponto').submit();
+                        } else {
+                            document.getElementById('localizacao').innerText = "Endereço não encontrado";
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro ao obter o endereço:', error);
+                        document.getElementById('localizacao').innerText = "Erro ao obter o endereço";
+                    });
+
+                }, function () {
+                    document.getElementById('localizacao').innerText = "Localização não disponível";
+                });
+            } else {
+                document.getElementById('localizacao').innerText = "Geolocalização não suportada pelo navegador.";
+            }
+        }
+
+        obterDataHora();
+    </script>
+</body>
+</html>
