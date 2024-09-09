@@ -40,6 +40,7 @@ def login():
     if request.method == 'POST':
         matricula = request.form['matricula']
         senha = request.form['senha']
+        
 
         # Verifica se a matrícula e a senha estão corretas
         if matricula in usuarios and usuarios[matricula] == senha:
