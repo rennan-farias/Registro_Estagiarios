@@ -1,14 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import requests
-import os  # Importar o módulo os para acessar variáveis de ambiente
+import os
+from datetime import datetime  # Importar datetime para capturar a data e hora atual
 
 app = Flask(__name__)
-app.secret_key = 'sua_chave_secreta_aqui'
+app.secret_key = os.getenv('FLASK_SECRET_KEY', 'default_key')
 
 # Simulação de banco de dados
 usuarios = {
-    '12345': 'senha123',  # Exemplo de e-mail e senha
+    '12345': 'senha123',
 }
+
+pontos_registrados = {}  # Dicionário para armazenar registros de pontos
 
 # Endpoint para geocodificação reversa usando o backend
 @app.route('/obter-endereco', methods=['POST'])
@@ -39,18 +42,16 @@ def obter_endereco():
 def login():
     if request.method == 'POST':
         matricula = request.form['matricula']
-        
         senha = request.form['senha']
-        
 
         # Verifica se a matrícula e a senha estão corretas
         if matricula in usuarios and usuarios[matricula] == senha:
-            return "Login realizado com sucesso!"  # Substitua com a página de destino após o login
+            return redirect(url_for('registrar_ponto', matricula=matricula))
         else:
             flash('Matrícula ou senha incorreta.')
-            return redirect(url_for('login'))  # Redireciona para a mesma página de login
+            return redirect(url_for('login'))
 
-    return render_template('index.html')  # Assegura que retorna o template na rota GET
+    return render_template('index.html')  # Certifique-se de que o template existe
 
 @app.route('/esqueci-minha-senha', methods=['GET', 'POST'])
 def esqueci_minha_senha():
@@ -58,7 +59,7 @@ def esqueci_minha_senha():
         email = request.form.get('email')
         
         # Simulação de verificação de e-mail e envio de instruções
-        if email in usuarios:  # Você pode substituir isso com uma verificação real
+        if email in usuarios:
             flash('Instruções para recuperação de senha foram enviadas para o seu e-mail.', 'success')
         else:
             flash('E-mail não encontrado.', 'error')
@@ -73,15 +74,14 @@ def registrar_ponto(matricula):
         data_hora = request.form.get('data_hora')
         localizacao = request.form.get('localizacao')
 
-        # Armazena a data, hora e localização no "banco de dados"
-        registrar_ponto[matricula] = {
+        pontos_registrados[matricula] = {
             'data_hora': data_hora,
             'localizacao': localizacao
         }
 
         flash('Ponto registrado com sucesso!')
-        return redirect(url_for('registrar_ponto', matricula=matricula))
-    
+        return redirect(url_for('registrar_ponto', matricula=matricula))  # Redireciona para a mesma página após o registro
+
     return render_template('registrar_ponto.html', matricula=matricula)
 
 if __name__ == '__main__':
